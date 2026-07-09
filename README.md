@@ -103,6 +103,7 @@ Full parts list, kinematics and control‑stack notes are in [`spec.json`](spec.
 | [`حركة مفاصل الرجل ومحركاتها.html`](حركة%20مفاصل%20الرجل%20ومحركاتها.html) | Leg‑joint / motor explainer |
 | [`build_robot.py`](build_robot.py) | Fusion 360 script — builds the parametric assembly |
 | [`spec.json`](spec.json) | Authoritative parametric spec (dimensions, joints, BOM, review) |
+| `ST Robot 2026.f3z` | Fusion 360 source archive (editable) |
 | `ST Robot 2026.3mf` | 3D model export (color/assembly) |
 | `ST Robot 2026.stl` | 3D‑printable mesh (STL) |
 | `docs/` | Images used in this README |
