@@ -1,3 +1,6 @@
 # Only Microsoft Word's temporary lock file (auto-created while a .docx is open,
 # auto-deleted on close — not real content). Everything else is committed.
 ~$*
+
+# Editor settings (VS Code)
+.vscode/
