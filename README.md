@@ -50,7 +50,7 @@ I then modeled the robot **parametrically in Fusion 360** (units: mm, g): a cent
 
 ![Fusion — assembling and mirroring the legs](docs/fusion-assembly.png)
 
-The chassis, legs and joints are all designed to be **3D‑printed**, which keeps the structure light (see the mass budget below). A companion script, [`build_robot.py`](build_robot.py), regenerates a parametric skeleton of the whole assembly inside Fusion (*Utilities → Add‑Ins → Scripts → Run*), and [`spec.json`](spec.json) holds every dimension as the single source of truth.
+The chassis, legs and joints are all designed to be **3D‑printed**, which keeps the structure light (see the mass budget below). Every dimension is captured in [`spec.json`](spec.json) as the single source of truth.
 
 ---
 
@@ -102,9 +102,7 @@ Full parts list, kinematics and control‑stack notes are in [`spec.json`](spec.
 |---|---|
 | [`robot-3d-model.html`](robot-3d-model.html) | Interactive 3D model viewer (Three.js) |
 | [`حركة الروبوت B2-W.html`](حركة%20الروبوت%20B2-W.html) | Robot movement‑modes explainer |
-| [`حركة مفاصل الرجل ومحركاتها.html`](حركة%20مفاصل%20الرجل%20ومحركاتها.html) | Leg‑joint / motor explainer |
-| [`build_robot.py`](build_robot.py) | Fusion 360 script — builds the parametric assembly |
-| [`spec.json`](spec.json) | Authoritative parametric spec (dimensions, joints, BOM, review) |
+| [`حركة مفاصل الرجل ومحركاتها.html`](حركة%20مفاصل%20الرجل%20ومحركاتها.html) | Leg‑joint / motor explainer || [`spec.json`](spec.json) | Authoritative parametric spec (dimensions, joints, BOM, review) |
 | `ST Robot 2026.f3z` | Fusion 360 source archive (editable) |
 | `ST Robot 2026.3mf` | 3D model export (color/assembly) |
 | `ST Robot 2026.stl` | 3D‑printable mesh (STL) |

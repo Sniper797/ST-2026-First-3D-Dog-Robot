@@ -516,7 +516,6 @@
     "swingInertia": "Account for swing-leg inertial torque: 730 g at the toe (wheel 350 g + AK60-6 380 g) adds dynamic hip/knee torque during fast recirculation. A lighter in-hub BLDC would cut unsprung mass.",
     "batteryMass": "Budget the 6S 8 Ah LiPo at ~1100 g (not 900 g).",
     "abductionMotorDims": "Confirm DM-J4310-2EC true outer diameter from the datasheet before finalizing the hip-corner packaging where three actuators cluster (spec lists 57 x 46 mm).",
-    "faithfulWheel": "A strict half-scale B2-W wheel would be ~112 mm; this spec uses 140 mm (bigger, better obstacle rolling). Either is acceptable.",
-    "fusionScript": "build_robot.py revolute joints were corrected to use createForAssemblyContext proxies for nested occurrences, and the root rename is guarded so it cannot abort the build."
+    "faithfulWheel": "A strict half-scale B2-W wheel would be ~112 mm; this spec uses 140 mm (bigger, better obstacle rolling). Either is acceptable."
   }
 }
