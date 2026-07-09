@@ -1,0 +1,522 @@
+{
+  "meta": {
+    "name": "DIY B2-W-style wheel-legged quadruped (approx half-scale)",
+    "coordinateFrame": "Right-handed body frame: X = forward, Y = left, Z = up. Origin at body geometric center. Legs mount near the four bottom corners. Left legs have +Y mount, right legs -Y mount; the hip-abduction (roll) axis is +X for left legs and -X for right legs so a positive commanded roll swings both sides outward (mirrored).",
+    "units": "millimetres (mm) for length, degrees (deg) for angles, grams (g) for mass, N*m for torque unless noted"
+  },
+  "body": {
+    "length": 550,
+    "width": 340,
+    "height": 150,
+    "wall": 4,
+    "mass": 1500,
+    "note": "Fore-aft X = 550, lateral Y = 340, vertical Z = 150. Monocoque/plated aluminium+carbon box; 'mass' is structure+panels only, actuators/electronics counted separately."
+  },
+  "legMounts": [
+    {
+      "name": "FL",
+      "x": 235,
+      "y": 150,
+      "z": -75,
+      "abductionAxisSign": 1,
+      "note": "front-left, +X +Y bottom corner"
+    },
+    {
+      "name": "FR",
+      "x": 235,
+      "y": -150,
+      "z": -75,
+      "abductionAxisSign": -1,
+      "note": "front-right, +X -Y bottom corner (mirror)"
+    },
+    {
+      "name": "RL",
+      "x": -235,
+      "y": 150,
+      "z": -75,
+      "abductionAxisSign": 1,
+      "note": "rear-left, -X +Y bottom corner"
+    },
+    {
+      "name": "RR",
+      "x": -235,
+      "y": -150,
+      "z": -75,
+      "abductionAxisSign": -1,
+      "note": "rear-right, -X -Y bottom corner (mirror)"
+    }
+  ],
+  "joints": {
+    "abduction": {
+      "role": "hip abduction/adduction (roll)",
+      "parent": "body",
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "axisNote": "Roll axis along body fore-aft X. Left legs use [1,0,0], right legs use [-1,0,0] for correct mirroring.",
+      "motor": "Damiao DM-J4310-2EC",
+      "motorDia": 57,
+      "motorThick": 46,
+      "mass": 300,
+      "ratedTorque": 3,
+      "peakTorque": 7,
+      "gearRatio": "10:1 QDD",
+      "rangeDeg": [
+        -50,
+        50
+      ],
+      "jointOriginFromParent": [
+        235,
+        150,
+        -75
+      ],
+      "originNote": "Equals the leg-mount coordinates (shown for FL); sign of x,y follow legMounts. Lightly loaded joint, smallest QDD module chosen."
+    },
+    "hipPitch": {
+      "role": "hip pitch (thigh), swings upper leg fore-aft",
+      "parent": "abduction",
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "axisNote": "Pitch axis lateral (Y), parallel to knee axis.",
+      "motor": "Unitree GO-M8010-6",
+      "motorDia": 96.5,
+      "motorThick": 42.3,
+      "mass": 530,
+      "ratedTorque": 9.5,
+      "peakTorque": 23.7,
+      "gearRatio": "6.33:1 QDD",
+      "rangeDeg": [
+        -54,
+        90
+      ],
+      "jointOriginFromParent": [
+        0,
+        40,
+        0
+      ],
+      "originNote": "Outboard lateral offset from roll axis to pitch axis (+Y for left, -Y for right); half-scale of B2 ~72 mm hip offset."
+    },
+    "knee": {
+      "role": "knee pitch (calf), flexes lower leg one direction",
+      "parent": "hipPitch",
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "axisNote": "Lateral (Y), parallel to hip-pitch. Knee bends one way only (asymmetric range).",
+      "motor": "Unitree GO-M8010-6",
+      "motorDia": 96.5,
+      "motorThick": 42.3,
+      "mass": 530,
+      "ratedTorque": 9.5,
+      "peakTorque": 23.7,
+      "gearRatio": "6.33:1 QDD",
+      "rangeDeg": [
+        -155,
+        25
+      ],
+      "jointOriginFromParent": [
+        0,
+        0,
+        -175
+      ],
+      "originNote": "Down the thigh link (length 175) from hip-pitch pivot to knee pivot. Same module as hip-pitch for part commonality/spares/tuning."
+    }
+  },
+  "links": {
+    "thigh": {
+      "length": 175,
+      "width": 40,
+      "thick": 30,
+      "note": "hip-pitch pivot to knee pivot; equal to calf (1:1)"
+    },
+    "calf": {
+      "length": 175,
+      "width": 38,
+      "thick": 28,
+      "note": "knee pivot to wheel axle; equal to thigh (1:1)"
+    }
+  },
+  "wheel": {
+    "dia": 140,
+    "width": 45,
+    "mass": 350,
+    "tire": "airless foam-filled/solid rubber, all-terrain tread, ~50 Shore A",
+    "axis": [
+      0,
+      1,
+      0
+    ],
+    "axisNote": "Wheel spins about lateral Y, same axis as knee output.",
+    "originFromKnee": [
+      0,
+      0,
+      -175
+    ],
+    "hubMotor": {
+      "model": "CubeMars AK60-6 V3.0 (QDD), coaxial with wheel",
+      "dia": 79,
+      "thick": 43,
+      "mass": 380,
+      "torque": 9,
+      "ratedTorque": 3,
+      "gearRatio": "6:1 QDD",
+      "note": "Peak drive need per wheel ~3-5 N*m; 9 N*m peak clears with margin. QDD chosen for torque-transparency/low unsprung mass; a purpose-built BLDC in-hub motor is the more elegant alternative."
+    }
+  },
+  "compute": {
+    "board": "NVIDIA Jetson Nano Developer Kit (B01)",
+    "dims": [
+      100,
+      80,
+      29
+    ],
+    "position": [
+      -40,
+      0,
+      90
+    ],
+    "alternative": "NVIDIA Jetson Orin Nano Super Dev Kit (100 x 79 x 21 mm), current-gen recommended replacement (Nano B01 is EOL); same 69.6 x 45 mm SO-DIMM module footprint.",
+    "note": "Mounted on top deck, rear-of-center; heatsink faces up."
+  },
+  "sensors": [
+    {
+      "type": "front RGB camera (Raspberry Pi Camera v2, IMX219)",
+      "dims": [
+        24,
+        25,
+        9
+      ],
+      "position": [
+        283,
+        0,
+        20
+      ],
+      "note": "front-facing on the +X face"
+    },
+    {
+      "type": "IMU (Adafruit BNO085 9-DOF)",
+      "dims": [
+        25.6,
+        22.7,
+        4.6
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "note": "inside body at geometric center, near CoM"
+    },
+    {
+      "type": "2D LiDAR (Slamtec RPLIDAR A1) - optional/top",
+      "dims": [
+        96.8,
+        70.3,
+        55
+      ],
+      "position": [
+        -150,
+        0,
+        103
+      ],
+      "note": "top rear, 360 deg clearance"
+    },
+    {
+      "type": "depth camera (Intel RealSense D435i) - optional front",
+      "dims": [
+        90,
+        25,
+        25
+      ],
+      "position": [
+        270,
+        0,
+        90
+      ],
+      "note": "optional stereo depth; alt to or with Pi cam"
+    }
+  ],
+  "battery": {
+    "type": "6S LiPo (22.2 V nominal), ~8000 mAh",
+    "capacity": "8000 mAh (~178 Wh)",
+    "dims": [
+      160,
+      50,
+      45
+    ],
+    "mass": 900,
+    "position": [
+      0,
+      0,
+      -30
+    ],
+    "note": "Mounted low and centered for low CoM."
+  },
+  "massBudget": {
+    "perComponent": [
+      {
+        "name": "Body chassis + panels",
+        "qty": 1,
+        "eachMass": 1500,
+        "total": 1500
+      },
+      {
+        "name": "Abduction motor (DM-J4310-2EC)",
+        "qty": 4,
+        "eachMass": 300,
+        "total": 1200
+      },
+      {
+        "name": "Hip-pitch motor (GO-M8010-6)",
+        "qty": 4,
+        "eachMass": 530,
+        "total": 2120
+      },
+      {
+        "name": "Knee motor (GO-M8010-6)",
+        "qty": 4,
+        "eachMass": 530,
+        "total": 2120
+      },
+      {
+        "name": "Wheel hub motor (AK60-6)",
+        "qty": 4,
+        "eachMass": 380,
+        "total": 1520
+      },
+      {
+        "name": "Wheel (tire + rim, excl. motor)",
+        "qty": 4,
+        "eachMass": 350,
+        "total": 1400
+      },
+      {
+        "name": "Thigh link",
+        "qty": 4,
+        "eachMass": 160,
+        "total": 640
+      },
+      {
+        "name": "Calf link",
+        "qty": 4,
+        "eachMass": 140,
+        "total": 560
+      },
+      {
+        "name": "Jetson Nano dev kit",
+        "qty": 1,
+        "eachMass": 140,
+        "total": 140
+      },
+      {
+        "name": "Front RGB camera",
+        "qty": 1,
+        "eachMass": 3,
+        "total": 3
+      },
+      {
+        "name": "IMU (BNO085)",
+        "qty": 1,
+        "eachMass": 3,
+        "total": 3
+      },
+      {
+        "name": "RPLIDAR A1",
+        "qty": 1,
+        "eachMass": 170,
+        "total": 170
+      },
+      {
+        "name": "Depth camera (optional)",
+        "qty": 1,
+        "eachMass": 72,
+        "total": 72
+      },
+      {
+        "name": "Battery (6S LiPo)",
+        "qty": 1,
+        "eachMass": 900,
+        "total": 900
+      },
+      {
+        "name": "Wiring / fasteners / misc",
+        "qty": 1,
+        "eachMass": 800,
+        "total": 800
+      }
+    ],
+    "totalMass": 13148,
+    "totalMassNote": "~13.15 kg; per-leg gravitational share ~3287 g (~32.3 N). Sits squarely in the ~12-13 kg wheel-legged class the actuator research targets."
+  },
+  "standingPose": {
+    "abduction_deg": 0,
+    "hipPitch_deg": 52,
+    "knee_deg": -104,
+    "description": "Symmetric squat with wheels directly under the four mounts (near-zero horizontal foot reach). Body center 360 mm above ground -> box bottom 285 mm off ground (within 250-320). Hip-pitch pivot 285 mm up, 140 mm wheel axle 70 mm up -> 215 mm vertical drop. With equal 175 mm links: 2 x 175 x cos(52 deg) = 215 mm. hipPitch = 52 deg thigh forward of straight-down, knee = -104 deg interior flexion (thigh and calf symmetric about vertical so horizontal components cancel). abduction = 0 keeps legs vertical in the frontal plane; positive roll leans/steers the body."
+  },
+  "parameters": [
+    {
+      "name": "linearScaleVsB2",
+      "value": "0.5",
+      "unit": "ratio"
+    },
+    {
+      "name": "bodyLength",
+      "value": "550",
+      "unit": "mm"
+    },
+    {
+      "name": "bodyWidth",
+      "value": "340",
+      "unit": "mm"
+    },
+    {
+      "name": "bodyHeight",
+      "value": "150",
+      "unit": "mm"
+    },
+    {
+      "name": "bodyWall",
+      "value": "4",
+      "unit": "mm"
+    },
+    {
+      "name": "hipPivotX",
+      "value": "235",
+      "unit": "mm"
+    },
+    {
+      "name": "hipMountY",
+      "value": "150",
+      "unit": "mm"
+    },
+    {
+      "name": "hipMountZ",
+      "value": "-75",
+      "unit": "mm"
+    },
+    {
+      "name": "hipLateralOffset",
+      "value": "40",
+      "unit": "mm"
+    },
+    {
+      "name": "thighLength",
+      "value": "175",
+      "unit": "mm"
+    },
+    {
+      "name": "calfLength",
+      "value": "175",
+      "unit": "mm"
+    },
+    {
+      "name": "thighCalfRatio",
+      "value": "1:1",
+      "unit": "ratio"
+    },
+    {
+      "name": "wheelDia",
+      "value": "140",
+      "unit": "mm"
+    },
+    {
+      "name": "wheelWidth",
+      "value": "45",
+      "unit": "mm"
+    },
+    {
+      "name": "wheelRadius",
+      "value": "70",
+      "unit": "mm"
+    },
+    {
+      "name": "groundClearanceToBoxBottom",
+      "value": "285",
+      "unit": "mm"
+    },
+    {
+      "name": "bodyCenterHeight",
+      "value": "360",
+      "unit": "mm"
+    },
+    {
+      "name": "abductionRange",
+      "value": "-50..50",
+      "unit": "deg"
+    },
+    {
+      "name": "hipPitchRange",
+      "value": "-54..90",
+      "unit": "deg"
+    },
+    {
+      "name": "kneeRange",
+      "value": "-155..25",
+      "unit": "deg"
+    },
+    {
+      "name": "jointMotorsPerLeg",
+      "value": "3",
+      "unit": "count"
+    },
+    {
+      "name": "wheelMotorsPerLeg",
+      "value": "1",
+      "unit": "count"
+    },
+    {
+      "name": "totalActuatedDOF",
+      "value": "16",
+      "unit": "count"
+    },
+    {
+      "name": "totalMass",
+      "value": "13148",
+      "unit": "g"
+    },
+    {
+      "name": "perLegMassShare",
+      "value": "3287",
+      "unit": "g"
+    },
+    {
+      "name": "gravity",
+      "value": "9.81",
+      "unit": "m/s^2"
+    },
+    {
+      "name": "hipPitchRatedTorque",
+      "value": "9.5",
+      "unit": "N*m"
+    },
+    {
+      "name": "hipPitchPeakTorque",
+      "value": "23.7",
+      "unit": "N*m"
+    },
+    {
+      "name": "wheelPeakTorque",
+      "value": "9",
+      "unit": "N*m"
+    }
+  ],
+  "engineeringReview": {
+    "note": "Independent adversarial review of this spec. Fold these into any real build; they correct optimistic entries above.",
+    "bodyMass": "The 1500 g body assumes a skeletal frame + thin skins, NOT a solid 4 mm aluminium/carbon box (that would weigh ~4-7 kg). If you build a solid 4 mm monocoque, budget the body at 3-5 kg and expect total ~16-18 kg, which raises every gravitational torque ~25-35%. Decide construction before final motor sizing.",
+    "hipKneeTorque": "Hip-pitch AND knee are equally the most-loaded joints in a symmetric squat. GO-M8010-6 (9.5 N*m rated / 23.7 N*m peak) is adequate for rolling and gentle stepping IF commanded horizontal foot reach is capped to ~100-120 mm (holding torque stays under ~7-8 N*m, within continuous). It is NOT sufficient for jumping / hard landings / fully-extended-leg loads, especially at the corrected higher mass. For jump dynamics upgrade hip+knee to e.g. CubeMars AK70-10 (~24.8 N*m peak / 8.3 N*m continuous).",
+    "abductionTorque": "Abduction (DM-J4310-2EC, 3 N*m rated / 7 N*m peak) is the tightest joint. Fine with legs near-vertical; load-bearing at large splay (>~30 deg) can exceed peak. Limit weighted stance to small roll, or upsize (e.g. DM-J4340) for lean-steering under load.",
+    "swingInertia": "Account for swing-leg inertial torque: 730 g at the toe (wheel 350 g + AK60-6 380 g) adds dynamic hip/knee torque during fast recirculation. A lighter in-hub BLDC would cut unsprung mass.",
+    "batteryMass": "Budget the 6S 8 Ah LiPo at ~1100 g (not 900 g).",
+    "abductionMotorDims": "Confirm DM-J4310-2EC true outer diameter from the datasheet before finalizing the hip-corner packaging where three actuators cluster (spec lists 57 x 46 mm).",
+    "faithfulWheel": "A strict half-scale B2-W wheel would be ~112 mm; this spec uses 140 mm (bigger, better obstacle rolling). Either is acceptable.",
+    "fusionScript": "build_robot.py revolute joints were corrected to use createForAssemblyContext proxies for nested occurrences, and the root rename is guarded so it cannot abort the build."
+  }
+}

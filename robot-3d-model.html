@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نموذج ثلاثي الأبعاد — كلب روبوتي مدولب (B2-W مصغّر)</title>
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f1a2e; --card2:#13223d; --line:#24344f;
+    --ink:#e8f0fc; --muted:#9fb2cf; --accent:#38bdf8; --accent2:#2E75B6;
+    --hip:#f59e0b; --knee:#a78bfa; --wheel:#34d399; --brain:#4ade80; --cam:#38bdf8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+  #app{display:flex;flex-direction:column;height:100vh;min-height:0}
+  header{padding:12px 18px;border-bottom:1px solid var(--line);display:flex;
+    align-items:baseline;gap:12px;flex-wrap:wrap}
+  header h1{font-size:19px;margin:0;font-weight:800}
+  header .sub{color:var(--muted);font-size:13px}
+  header .sub b{color:var(--accent)}
+  .main{flex:1 1 auto;display:flex;min-height:0}
+  #stage{flex:1 1 auto;position:relative;min-width:0;
+    background:radial-gradient(120% 120% at 50% 0%,#0e1a30 0%,#0a0f1c 70%)}
+  #stage canvas{display:block;width:100%;height:100%}
+  #hint{position:absolute;inset-inline-start:14px;bottom:12px;color:#7f93b3;font-size:12px;
+    background:rgba(11,18,32,.6);border:1px solid var(--line);border-radius:8px;padding:6px 10px;pointer-events:none}
+  #err{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:30px;color:#fca5a5}
+  aside{flex:0 0 320px;max-width:340px;overflow-y:auto;border-inline-start:1px solid var(--line);
+    padding:14px;display:flex;flex-direction:column;gap:12px;background:#0a1120}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .box h3{margin:0 0 10px;font-size:14px;color:var(--accent);font-weight:800}
+  .btns{display:flex;flex-wrap:wrap;gap:7px}
+  button{appearance:none;cursor:pointer;border:1px solid var(--line);background:var(--card2);
+    color:var(--ink);padding:8px 12px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;transition:.15s}
+  button:hover{border-color:var(--accent2);background:#172a49}
+  button.active{background:var(--accent2);border-color:var(--accent);color:#fff;box-shadow:0 0 0 3px rgba(56,189,248,.16)}
+  .sld{margin:10px 0}
+  .sld label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;color:var(--muted)}
+  .sld label b{color:var(--ink);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .toggles{display:flex;flex-wrap:wrap;gap:8px}
+  .tg{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;
+    border:1px solid var(--line);border-radius:8px;padding:6px 9px;background:var(--card2)}
+  .tg input{accent-color:var(--accent)}
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .lg{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+  .sw{width:14px;height:14px;border-radius:4px;flex:none}
+  table.dim{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.dim td{padding:4px 2px;border-bottom:1px solid #16233c}
+  table.dim td:last-child{text-align:end;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+  table.dim td:first-child{color:var(--muted)}
+  .note{font-size:12px;line-height:1.7;color:#cfe0f4;margin:8px 0 0}
+  .small{font-size:11.5px;color:#7f93b3}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>نموذج ثلاثي الأبعاد لكلب روبوتي مدولب</h1>
+    <div class="sub">نسخة مصغّرة بأسلوب <b>Unitree B2-W</b> — دُر حول المجسّم بالفأرة، وحرّك المفاصل بالمنزلقات</div>
+  </header>
+
+  <div class="main">
+    <div id="stage">
+      <div id="hint">اسحب = تدوير · عجلة الفأرة = تقريب · زر يمين/سحب بإصبعين = تحريك</div>
+      <div id="err"></div>
+    </div>
+
+    <aside>
+      <div class="box">
+        <h3>أوضاع جاهزة</h3>
+        <div class="btns" id="poseBtns">
+          <button data-pose="stand" class="active">🐕 وقوف</button>
+          <button data-pose="crouch">🔽 انبطاح</button>
+          <button data-pose="sit">🪑 جلوس</button>
+          <button data-pose="reach">🙆 مدّ الأرجل</button>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>تحكّم بالمفاصل (كل الأرجل)</h3>
+        <div class="sld">
+          <label>1 · فرد جانبي (Abduction) <b><span id="vAbd">0</span>°</b></label>
+          <input id="sAbd" type="range" min="-50" max="50" value="0">
+        </div>
+        <div class="sld">
+          <label>2 · الورك (Hip pitch) <b><span id="vHip">52</span>°</b></label>
+          <input id="sHip" type="range" min="-54" max="90" value="52">
+        </div>
+        <div class="sld">
+          <label>3 · الركبة (Knee) <b><span id="vKnee">-104</span>°</b></label>
+          <input id="sKnee" type="range" min="-155" max="25" value="-104">
+        </div>
+        <label class="tg" style="margin-top:8px"><input type="checkbox" id="spin"> 4 · تدوير العجلات (Wheel motor)</label>
+      </div>
+
+      <div class="box">
+        <h3>عرض</h3>
+        <div class="toggles">
+          <label class="tg"><input type="checkbox" id="tRot"> تدوير تلقائي</label>
+          <label class="tg"><input type="checkbox" id="tLabels" checked> تسمية الأجزاء</label>
+          <label class="tg"><input type="checkbox" id="tGrid" checked> شبكة الأرض</label>
+          <label class="tg"><input type="checkbox" id="tAxes"> محاور</label>
+          <label class="tg"><input type="checkbox" id="tWire"> هيكل سلكي</label>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>مفتاح الألوان</h3>
+        <div class="legend">
+          <div class="lg"><span class="sw" style="background:var(--hip)"></span> محرّكات الورك</div>
+          <div class="lg"><span class="sw" style="background:var(--knee)"></span> محرّك الركبة</div>
+          <div class="lg"><span class="sw" style="background:var(--wheel)"></span> العجلة/المحور</div>
+          <div class="lg"><span class="sw" style="background:#c9ced2"></span> الوصلات/الهيكل</div>
+          <div class="lg"><span class="sw" style="background:var(--brain)"></span> Jetson Nano</div>
+          <div class="lg"><span class="sw" style="background:var(--cam)"></span> الكاميرا</div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>الأبعاد الرئيسية</h3>
+        <table class="dim" id="dimTable"></table>
+        <p class="note">كل رجل = <b>3 محرّكات دوّارة</b> (فرد جانبي + ورك + ركبة) <b>+ محرّك عجلة</b> واحد،
+          أي 4 محرّكات × 4 أرجل = <b>16 محرّكاً</b>. هذه هي بنية رجل Unitree نفسها مصغّرة.</p>
+        <p class="small" id="specNote">القيم مستمدّة من ملف المواصفات <b>spec.json</b> ومراجَعة هندسياً. الأبعاد نصف مقياس Unitree B2‑W تقريباً.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ---------------------------------------------------------------------------
+//  SPEC — all dimensions in millimetres. (Swapped in from spec.json / research.)
+// ---------------------------------------------------------------------------
+const SPEC = {
+  body:   { L:550, W:340, H:150 },              // fore-aft × lateral × height (mm)
+  mount:  { insetX:40, dropY:0 },               // hip pivot at x=±235, y=-75 (box bottom)
+  abd:    { dia:57, thick:46, offZ:40 },        // Damiao DM-J4310-2EC + lateral standoff
+  hip:    { dia:96.5, thick:42.3 },             // Unitree GO-M8010-6 (hip pitch)
+  thigh:  { len:175, w:40, t:30 },
+  knee:   { dia:96.5, thick:42.3 },             // Unitree GO-M8010-6 (same module)
+  calf:   { len:175, w:38, t:28 },
+  wheel:  { dia:140, width:45, hubDia:79 },     // wheel + CubeMars AK60-6 hub motor
+  jetson: { L:100, W:80, H:29 },
+  camera: { s:26 },
+  lidar:  { dia:70, h:55 },
+  pose:   { abd:0, hip:52, knee:-104 }          // symmetric-squat standing pose (deg)
+};
+
+const COL = {
+  hip:0xf59e0b, knee:0xa78bfa, wheel:0x222831, hub:0x34d399,
+  link:0xc9ced2, bracket:0x8a97a8, body:0xcdd8e6, brain:0x22a355,
+  brainTop:0x184a2b, cam:0x2b6cb0, lidar:0x2a3547
+};
+
+const mm = v => v/1000;   // mm → metres (scene units)
+const D  = Math.PI/180;
+
+// ---------------------------------------------------------------------------
+//  Renderer / scene / camera
+// ---------------------------------------------------------------------------
+const stage = document.getElementById('stage');
+let renderer, scene, camera, controls;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias:true, preserveDrawingBuffer:true });
+} catch(e){ showErr('WebGL غير مدعوم في هذا المتصفح.'); }
+
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.appendChild(renderer.domElement);
+
+scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b1220);
+scene.fog = new THREE.Fog(0x0b1220, 3.2, 7.5);
+
+camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+camera.position.set(0.95, 0.62, 1.15);
+
+controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 0.4;
+controls.maxDistance = 4;
+controls.target.set(0, 0.14, 0);
+
+// lights
+scene.add(new THREE.HemisphereLight(0xbcd3ff, 0x0a0f1c, 0.9));
+const key = new THREE.DirectionalLight(0xffffff, 2.1);
+key.position.set(1.4, 2.2, 1.2);
+key.castShadow = true;
+key.shadow.mapSize.set(2048,2048);
+key.shadow.camera.near = 0.5; key.shadow.camera.far = 8;
+key.shadow.camera.left=-1.2; key.shadow.camera.right=1.2;
+key.shadow.camera.top=1.2; key.shadow.camera.bottom=-1.2;
+key.shadow.bias = -0.0004;
+scene.add(key);
+const fill = new THREE.DirectionalLight(0x88aaff, 0.5);
+fill.position.set(-1.5, 0.8, -1.0);
+scene.add(fill);
+
+// ground
+const grid = new THREE.GridHelper(4, 40, 0x2b3d5c, 0x1a2740);
+grid.material.transparent = true; grid.material.opacity = 0.6;
+scene.add(grid);
+const shadowMat = new THREE.ShadowMaterial({ opacity:0.28 });
+const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(6,6), shadowMat);
+groundPlane.rotation.x = -Math.PI/2;
+groundPlane.receiveShadow = true;
+scene.add(groundPlane);
+const axes = new THREE.AxesHelper(0.28); axes.visible=false; scene.add(axes);
+
+// ---------------------------------------------------------------------------
+//  Materials
+// ---------------------------------------------------------------------------
+const mat = (color, m=0.7, r=0.4) => new THREE.MeshStandardMaterial({ color, metalness:m, roughness:r });
+const M = {
+  hip: mat(COL.hip,0.6,0.35), knee: mat(COL.knee,0.55,0.4),
+  wheel: mat(COL.wheel,0.3,0.7), hub: mat(COL.hub,0.6,0.35),
+  link: mat(COL.link,0.85,0.35), bracket: mat(COL.bracket,0.8,0.4),
+  body: mat(COL.body,0.85,0.35), brain: mat(COL.brain,0.2,0.6),
+  brainTop: mat(COL.brainTop,0.2,0.6), cam: mat(COL.cam,0.4,0.5),
+  lidar: mat(COL.lidar,0.5,0.5)
+};
+const allMats = Object.values(M);
+
+// ---------------------------------------------------------------------------
+//  Mesh helpers
+// ---------------------------------------------------------------------------
+function box(l,w,h,material){ // l=x, w=z, h=y  (metres in)
+  const g = new THREE.Mesh(new THREE.BoxGeometry(l,h,w), material);
+  g.castShadow = true; g.receiveShadow = true; return g;
+}
+// cylinder oriented along a given axis: 'x','y','z'
+function cyl(dia, len, material, axis){
+  const g = new THREE.Mesh(new THREE.CylinderGeometry(dia/2, dia/2, len, 40), material);
+  if(axis==='x') g.rotation.z = Math.PI/2;
+  if(axis==='z') g.rotation.x = Math.PI/2;
+  g.castShadow = true; g.receiveShadow = true; return g;
+}
+// a link bar from origin straight down (-Y) of given length
+function linkBar(len, w, t, material){
+  const g = box(mm(w), mm(t), mm(len), material);
+  g.position.y = -mm(len)/2;
+  return g;
+}
+
+// text sprite (Arabic-capable via canvas)
+function labelSprite(text, color){
+  const cv = document.createElement('canvas');
+  const ctx = cv.getContext('2d');
+  const font = '700 40px Tahoma, Arial';
+  ctx.font = font;
+  const w = Math.ceil(ctx.measureText(text).width)+40;
+  cv.width = w; cv.height = 64;
+  ctx.font = font; ctx.direction='rtl'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle = 'rgba(11,18,32,0.82)';
+  roundRect(ctx, 2, 2, w-4, 60, 12); ctx.fill();
+  ctx.strokeStyle = color; ctx.lineWidth = 2.5; roundRect(ctx,2,2,w-4,60,12); ctx.stroke();
+  ctx.fillStyle = '#eaf2ff'; ctx.fillText(text, w/2, 33);
+  const tex = new THREE.CanvasTexture(cv); tex.anisotropy = 4;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, depthTest:false, transparent:true }));
+  const sc = 0.00075; sp.scale.set(w*sc, 64*sc, 1);
+  sp.renderOrder = 999;
+  return sp;
+}
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+// ---------------------------------------------------------------------------
+//  Build the robot
+// ---------------------------------------------------------------------------
+const robot = new THREE.Group();
+scene.add(robot);
+const labelGroup = new THREE.Group(); scene.add(labelGroup);
+
+const pivots = { abd:[], hip:[], knee:[], wheel:[] };
+
+function buildRobot(){
+  robot.clear(); labelGroup.clear();
+  pivots.abd=[]; pivots.hip=[]; pivots.knee=[]; pivots.wheel=[];
+
+  // --- body box ---
+  const bodyMesh = box(mm(SPEC.body.L), mm(SPEC.body.W), mm(SPEC.body.H), M.body);
+  robot.add(bodyMesh);
+  // top electronics: Jetson Nano
+  const jet = box(mm(SPEC.jetson.L), mm(SPEC.jetson.W), mm(SPEC.jetson.H), M.brain);
+  jet.position.set(mm(90), mm(SPEC.body.H/2 + SPEC.jetson.H/2), 0);
+  robot.add(jet);
+  const jetTop = box(mm(SPEC.jetson.L*0.9), mm(SPEC.jetson.W*0.55), mm(6), M.brainTop);
+  jetTop.position.set(mm(90), mm(SPEC.body.H/2 + SPEC.jetson.H + 1), mm(-8));
+  robot.add(jetTop);
+  // front camera
+  const cam = box(mm(SPEC.camera.s), mm(SPEC.camera.s), mm(SPEC.camera.s), M.cam);
+  cam.position.set(mm(SPEC.body.L/2 + SPEC.camera.s/2 - 4), mm(10), 0);
+  robot.add(cam);
+  const lens2 = new THREE.Mesh(new THREE.CylinderGeometry(mm(9),mm(9),mm(8),24), mat(0x0a0f18,0.2,0.3));
+  lens2.rotation.z = Math.PI/2; lens2.position.set(mm(SPEC.body.L/2 + SPEC.camera.s -6), mm(10),0);
+  robot.add(lens2);
+  // LiDAR puck (rear top)
+  const lidar = cyl(mm(SPEC.lidar.dia), mm(SPEC.lidar.h), M.lidar, 'y');
+  lidar.position.set(mm(-140), mm(SPEC.body.H/2 + SPEC.lidar.h/2), 0);
+  robot.add(lidar);
+
+  // --- four legs ---
+  const legs = [
+    { name:'FL', sx:+1, sz:+1 }, { name:'FR', sx:+1, sz:-1 },
+    { name:'RL', sx:-1, sz:+1 }, { name:'RR', sx:-1, sz:-1 },
+  ];
+  legs.forEach((leg,i)=> buildLeg(leg, i===0));  // label only the front-left leg
+  applyPose(SPEC.pose.abd, SPEC.pose.hip, SPEC.pose.knee);
+
+  // rest robot on ground after standing pose
+  robot.updateMatrixWorld(true);
+  const bb = new THREE.Box3().setFromObject(robot);
+  robot.position.y -= bb.min.y;
+  robot.updateMatrixWorld(true);
+}
+
+function buildLeg(leg, withLabels){
+  const mountX = leg.sx * mm(SPEC.body.L/2 - SPEC.mount.insetX);
+  const mountZ = leg.sz * mm(SPEC.body.W/2);
+  const mountY = -mm(SPEC.body.H/2 - SPEC.mount.dropY);
+
+  // legRoot at the shoulder
+  const root = new THREE.Group();
+  root.position.set(mountX, mountY, mountZ);
+  robot.add(root);
+
+  // (1) abduction pivot — rotates about X (fore-aft) → splays leg sideways
+  const abd = new THREE.Group(); root.add(abd);
+  abd.userData.side = leg.sz;
+  pivots.abd.push(abd);
+  const abdMotor = cyl(mm(SPEC.abd.dia), mm(SPEC.abd.thick), M.hip, 'x');
+  abdMotor.position.set(0,0, leg.sz*mm(SPEC.abd.thick/2));
+  abd.add(abdMotor);
+
+  // lateral standoff bracket out to the pitch motor
+  const bracket = box(mm(60), mm(SPEC.abd.offZ), mm(46), M.bracket);
+  bracket.position.set(0, mm(-6), leg.sz*mm(SPEC.abd.offZ/2 + SPEC.abd.thick/2));
+  abd.add(bracket);
+
+  // (2) hip-pitch pivot — rotates about Z (lateral) → swings whole leg up/down
+  const hip = new THREE.Group();
+  hip.position.set(0, mm(-6), leg.sz*mm(SPEC.abd.offZ + SPEC.abd.thick/2));
+  abd.add(hip);
+  pivots.hip.push(hip);
+  const hipMotor = cyl(mm(SPEC.hip.dia), mm(SPEC.hip.thick), M.hip, 'z');
+  hip.add(hipMotor);
+  // thigh link (hangs down at pitch=0)
+  hip.add(linkBar(SPEC.thigh.len, SPEC.thigh.w, SPEC.thigh.t, M.link));
+
+  // (3) knee pivot at end of thigh — rotates about Z → bends the calf
+  const knee = new THREE.Group();
+  knee.position.set(0, -mm(SPEC.thigh.len), 0);
+  hip.add(knee);
+  pivots.knee.push(knee);
+  const kneeMotor = cyl(mm(SPEC.knee.dia), mm(SPEC.knee.thick), M.knee, 'z');
+  knee.add(kneeMotor);
+  knee.add(linkBar(SPEC.calf.len, SPEC.calf.w, SPEC.calf.t, M.link));
+
+  // (4) wheel at end of calf — spins about Z
+  const wheel = new THREE.Group();
+  wheel.position.set(0, -mm(SPEC.calf.len), 0);
+  knee.add(wheel);
+  pivots.wheel.push(wheel);
+  const tire = cyl(mm(SPEC.wheel.dia), mm(SPEC.wheel.width), M.wheel, 'z');
+  wheel.add(tire);
+  const hubM = cyl(mm(SPEC.wheel.hubDia), mm(SPEC.wheel.width+6), M.hub, 'z');
+  wheel.add(hubM);
+  // a couple of spokes so spin is visible
+  for(let a=0;a<4;a++){
+    const spoke = box(mm(SPEC.wheel.dia*0.8), mm(8), mm(6), mat(0x6b7f9c,0.6,0.5));
+    spoke.position.z = 0; spoke.rotation.z = a*Math.PI/4;
+    wheel.add(spoke);
+  }
+
+  if(withLabels){
+    addLabel(hip, 'محرّكا الورك (فرد + رفع)', '#f59e0b', new THREE.Vector3(mm(20),mm(105),leg.sz*mm(20)));
+    addLabel(kneeMotor,'محرّك الركبة', '#a78bfa', new THREE.Vector3(mm(-55),0,leg.sz*mm(60)));
+    addLabel(tire, 'محرّك العجلة', '#34d399', new THREE.Vector3(mm(-40),mm(-35),leg.sz*mm(60)));
+  }
+}
+
+const labelAnchors = [];
+function addLabel(target, text, color, offset){
+  const sp = labelSprite(text, color);
+  labelGroup.add(sp);
+  labelAnchors.push({ sp, target, offset });
+}
+// body labels
+function addBodyLabels(){
+  const jetAnchor = new THREE.Object3D();
+  jetAnchor.position.set(mm(90), mm(SPEC.body.H/2+SPEC.jetson.H), 0);
+  robot.add(jetAnchor);
+  addLabel(jetAnchor, 'Jetson Nano', '#4ade80', new THREE.Vector3(0,mm(55),0));
+  const camAnchor = new THREE.Object3D();
+  camAnchor.position.set(mm(SPEC.body.L/2+SPEC.camera.s), mm(10),0);
+  robot.add(camAnchor);
+  addLabel(camAnchor,'كاميرا + مستشعرات','#38bdf8', new THREE.Vector3(mm(40),mm(45),0));
+}
+
+// ---------------------------------------------------------------------------
+//  Pose
+// ---------------------------------------------------------------------------
+function applyPose(abdDeg, hipDeg, kneeDeg){
+  pivots.abd.forEach(p => p.rotation.x = -p.userData.side * abdDeg*D);
+  pivots.hip.forEach(p => p.rotation.z = hipDeg*D);
+  pivots.knee.forEach(p => p.rotation.z = kneeDeg*D);
+  robot.updateMatrixWorld(true);
+  const bb = new THREE.Box3().setFromObject(robot);
+  // keep wheels on the grid
+  robot.position.y -= bb.min.y - 0; // shift so min y == 0
+}
+
+buildRobot();
+addBodyLabels();
+
+// ---------------------------------------------------------------------------
+//  UI wiring
+// ---------------------------------------------------------------------------
+const sAbd=g('sAbd'), sHip=g('sHip'), sKnee=g('sKnee');
+function g(id){ return document.getElementById(id); }
+function refreshPose(){
+  const a=+sAbd.value, h=+sHip.value, k=+sKnee.value;
+  g('vAbd').textContent=a; g('vHip').textContent=h; g('vKnee').textContent=k;
+  applyPose(a,h,k);
+}
+[sAbd,sHip,sKnee].forEach(s=> s.addEventListener('input', refreshPose));
+
+const POSES = {
+  stand:  {abd:0,  hip:52,  knee:-104},
+  crouch: {abd:0,  hip:74,  knee:-140},
+  sit:    {abd:0,  hip:22,  knee:-150},
+  reach:  {abd:26, hip:-20, knee:-22},
+};
+g('poseBtns').addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  [...g('poseBtns').children].forEach(x=>x.classList.toggle('active', x===b));
+  const p=POSES[b.dataset.pose];
+  sAbd.value=p.abd; sHip.value=p.hip; sKnee.value=p.knee; refreshPose();
+});
+
+let spinOn=false, autoRot=false;
+g('spin').addEventListener('change', e=> spinOn=e.target.checked);
+g('tRot').addEventListener('change', e=> autoRot=e.target.checked);
+g('tLabels').addEventListener('change', e=> labelGroup.visible=e.target.checked);
+g('tGrid').addEventListener('change', e=> grid.visible=e.target.checked);
+g('tAxes').addEventListener('change', e=> axes.visible=e.target.checked);
+g('tWire').addEventListener('change', e=> allMats.forEach(m=> m.wireframe=e.target.checked));
+
+// dimensions table
+function fillDims(){
+  const rows = [
+    ['الجسم (طول×عرض×ارتفاع)', SPEC.body.L+'×'+SPEC.body.W+'×'+SPEC.body.H+' مم'],
+    ['الفخذ / الساق (1:1)', SPEC.thigh.len+' / '+SPEC.calf.len+' مم'],
+    ['قطر العجلة', SPEC.wheel.dia+' مم'],
+    ['محرّك الورك/الركبة', SPEC.hip.dia+'×'+SPEC.hip.thick+' مم · GO-M8010-6'],
+    ['محرّك الفرد الجانبي', SPEC.abd.dia+'×'+SPEC.abd.thick+' مم · DM-J4310'],
+    ['الكتلة التقديرية', '~13 كغم (≈16–18 لجسم صلب 4مم)'],
+    ['عدد المحرّكات', '16 (12 مفصل + 4 عجلات)'],
+  ];
+  g('dimTable').innerHTML = rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('');
+}
+fillDims();
+
+// ---------------------------------------------------------------------------
+//  Loop
+// ---------------------------------------------------------------------------
+let last = 0;
+function tick(t){
+  const dt = Math.min(0.05, (t-last)/1000); last=t;
+  if(spinOn) pivots.wheel.forEach(w=> w.rotation.z += dt*10);
+  if(autoRot) robot.rotation.y += dt*0.4, labelGroup.rotation.y = robot.rotation.y;
+  // orient labels to their targets
+  const v = new THREE.Vector3();
+  labelAnchors.forEach(a=>{
+    a.target.getWorldPosition(v);
+    const off = a.offset.clone();
+    v.add(off);
+    a.sp.position.copy(v);
+  });
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+// ---------------------------------------------------------------------------
+//  Resize + error
+// ---------------------------------------------------------------------------
+function resize(){
+  const w=stage.clientWidth, h=stage.clientHeight;
+  if(!w || !h) return;               // skip until the stage has a real layout size
+  renderer.setSize(w,h,false);
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+// robust first-load sizing: observe the stage and also retry on load
+if(window.ResizeObserver){ new ResizeObserver(resize).observe(stage); }
+window.addEventListener('load', resize);
+requestAnimationFrame(resize);
+resize();
+
+function showErr(msg){
+  const e=document.getElementById('err');
+  e.style.display='grid';
+  e.innerHTML = '<div><h2>تعذّر تحميل العارض ثلاثي الأبعاد</h2><p>'+msg+
+    '</p><p class="small">يتطلب اتصالاً بالإنترنت لتحميل مكتبة three.js من الـ CDN عند أول فتح.</p></div>';
+}
+window.addEventListener('error', ev=>{
+  if(String(ev.message||'').match(/import|module|three/i)) showErr('فشل تحميل three.js — تحقّق من الاتصال بالإنترنت.');
+});
+</script>
+</body>
+</html>

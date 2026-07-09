@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 680 372" font-family="'Segoe UI',Arial,sans-serif" role="img" aria-label="One leg of the robot: two hip motors stacked at the shoulder, a knee motor, and a driven wheel.">
+  <rect x="0" y="0" width="680" height="372" rx="16" fill="#0b1220"/>
+
+  <!-- body stub -->
+  <rect x="150" y="50" width="210" height="32" rx="8" fill="#13223d" stroke="#24344f" stroke-width="1"/>
+  <text x="255" y="70" text-anchor="middle" font-size="12" fill="#9fb2cf">Body / torso</text>
+
+  <!-- links -->
+  <line x1="305" y1="122" x2="250" y2="205" stroke="#c9ced2" stroke-width="16" stroke-linecap="round"/>
+  <path d="M250 205 Q256 255 292 293" fill="none" stroke="#c9ced2" stroke-width="11" stroke-linecap="round"/>
+
+  <!-- wheel -->
+  <circle cx="292" cy="298" r="36" fill="none" stroke="#c9ced2" stroke-width="6"/>
+
+  <!-- motors -->
+  <ellipse cx="280" cy="100" rx="28" ry="16" fill="#f59e0b"/>
+  <circle cx="305" cy="122" r="25" fill="#f59e0b"/>
+  <circle cx="250" cy="205" r="17" fill="#a78bfa"/>
+  <circle cx="292" cy="298" r="13" fill="#34d399"/>
+
+  <!-- up/down motion arrow -->
+  <path d="M200 245 Q182 200 202 152" fill="none" stroke="#9fb2cf" stroke-width="1.5"/>
+  <path d="M195 160 L202 152 L209 160" fill="none" stroke="#9fb2cf" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M193 237 L200 245 L207 237" fill="none" stroke="#9fb2cf" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- wheel spin arrow -->
+  <path d="M292 273 A25 25 0 0 1 317 300" fill="none" stroke="#9fb2cf" stroke-width="1.5"/>
+  <path d="M311 293 L318 300 L311 307" fill="none" stroke="#9fb2cf" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- ground -->
+  <line x1="232" y1="336" x2="360" y2="336" stroke="#3a4a63" stroke-width="2"/>
+  <line x1="240" y1="336" x2="232" y2="344" stroke="#3a4a63" stroke-width="1"/>
+  <line x1="262" y1="336" x2="254" y2="344" stroke="#3a4a63" stroke-width="1"/>
+  <line x1="284" y1="336" x2="276" y2="344" stroke="#3a4a63" stroke-width="1"/>
+  <line x1="306" y1="336" x2="298" y2="344" stroke="#3a4a63" stroke-width="1"/>
+  <line x1="328" y1="336" x2="320" y2="344" stroke="#3a4a63" stroke-width="1"/>
+
+  <!-- leaders -->
+  <line x1="446" y1="100" x2="306" y2="92" stroke="#5a6b86" stroke-width="0.8" stroke-dasharray="3 3"/><circle cx="306" cy="92" r="2" fill="#5a6b86"/>
+  <line x1="446" y1="158" x2="328" y2="126" stroke="#5a6b86" stroke-width="0.8" stroke-dasharray="3 3"/><circle cx="328" cy="126" r="2" fill="#5a6b86"/>
+  <line x1="446" y1="220" x2="266" y2="205" stroke="#5a6b86" stroke-width="0.8" stroke-dasharray="3 3"/><circle cx="266" cy="205" r="2" fill="#5a6b86"/>
+  <line x1="446" y1="303" x2="304" y2="298" stroke="#5a6b86" stroke-width="0.8" stroke-dasharray="3 3"/><circle cx="304" cy="298" r="2" fill="#5a6b86"/>
+
+  <!-- labels -->
+  <text x="452" y="96" font-size="14" font-weight="600" fill="#f59e0b">1 · Hip abduction motor</text>
+  <text x="452" y="113" font-size="12" fill="#9fb2cf">Splays leg in / out (sideways)</text>
+
+  <text x="452" y="154" font-size="14" font-weight="600" fill="#f59e0b">2 · Hip pitch motor</text>
+  <text x="452" y="171" font-size="12" fill="#9fb2cf">Swings whole leg up / down</text>
+
+  <text x="452" y="216" font-size="14" font-weight="600" fill="#a78bfa">3 · Knee motor</text>
+  <text x="452" y="233" font-size="12" fill="#9fb2cf">Bends the lower leg (calf)</text>
+
+  <text x="452" y="299" font-size="14" font-weight="600" fill="#34d399">4 · Wheel-hub motor</text>
+  <text x="452" y="316" font-size="12" fill="#9fb2cf">Drives / spins the wheel</text>
+</svg>

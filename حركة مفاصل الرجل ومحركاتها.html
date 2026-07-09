@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كيف تتحرّك مفاصل الرجل — محركات كلب روبوتي</title>
+<style>
+  #leg-viz{
+    --bg:#0b1220; --card:#0f1a2e; --card2:#13223d; --line:#24344f;
+    --ink:#e8f0fc; --muted:#9fb2cf; --accent:#38bdf8; --accent2:#2E75B6;
+    --metal:#cdd8e6; --metal-d:#8ea3bd; --tire:#111827; --hub:#334155;
+    --hip:#f59e0b; --knee:#a78bfa; --wheel:#34d399; --path:#38bdf8;
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif; color:var(--ink);
+    background:var(--bg); border:1px solid var(--line); border-radius:16px;
+    padding:18px; max-width:1000px; margin:0 auto; direction:rtl;
+  }
+  #leg-viz .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  #leg-viz h1{font-size:21px;margin:0 0 2px;font-weight:800}
+  #leg-viz .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+  #leg-viz .wrap{display:flex;gap:14px;flex-wrap:wrap}
+  #leg-viz .stage{flex:1 1 460px;background:#0a1120;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  #leg-viz svg{display:block;width:100%;height:auto}
+  #leg-viz .side{flex:1 1 260px;display:flex;flex-direction:column;gap:12px;min-width:240px}
+  #leg-viz .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+  #leg-viz .box h3{margin:0 0 10px;font-size:14px;color:var(--accent);font-weight:800}
+  #leg-viz .btns{display:flex;flex-wrap:wrap;gap:7px}
+  #leg-viz button{appearance:none;cursor:pointer;border:1px solid var(--line);background:var(--card2);
+    color:var(--ink);padding:8px 12px;border-radius:9px;font-size:13px;font-weight:700;font-family:inherit;transition:.15s}
+  #leg-viz button:hover{border-color:var(--accent2);background:#172a49}
+  #leg-viz button.active{background:var(--accent2);border-color:var(--accent);color:#fff;box-shadow:0 0 0 3px rgba(56,189,248,.16)}
+  #leg-viz .sld{margin:11px 0}
+  #leg-viz .sld label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;color:var(--muted)}
+  #leg-viz .sld label b{color:var(--ink);font-variant-numeric:tabular-nums}
+  #leg-viz input[type=range]{width:100%;accent-color:var(--accent)}
+  #leg-viz .read{display:flex;gap:8px;flex-wrap:wrap}
+  #leg-viz .rd{flex:1 1 auto;background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;text-align:center}
+  #leg-viz .rd .k{font-size:11px;color:var(--muted)}
+  #leg-viz .rd .v{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+  #leg-viz .note{font-size:12.5px;line-height:1.7;color:#cfe0f4}
+  #leg-viz .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:5px}
+</style>
+</head>
+<body>
+<div id="leg-viz">
+  <h2 class="sr-only">رسم متحرك تفاعلي لرجل واحدة من كلب روبوتي يوضّح كيف يحرّك كل محرك (الورك، الركبة، العجلة) مفصله وكيف تتكامل لتحريك الرجل.</h2>
+  <h1>كيف تحرّك المحركات مفاصل الرجل</h1>
+  <div class="sub">رجل واحدة — اختر محركاً لعزله، أو حرّك المنزلقات لتوجيه الرجل بنفسك</div>
+
+  <div class="wrap">
+    <div class="stage">
+      <svg viewBox="0 0 520 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="رجل روبوتية بثلاثة محركات">
+        <!-- body stub -->
+        <rect x="150" y="70" width="260" height="54" rx="16" fill="#1b2a44" stroke="#2b3d5c" stroke-width="2"/>
+        <text x="280" y="103" fill="#7f93b3" font-size="15" text-anchor="middle" direction="rtl">جسم الروبوت</text>
+
+        <!-- range arcs -->
+        <path id="hipArc" fill="none" stroke="var(--hip)" stroke-width="2" stroke-dasharray="3 4" opacity="0.5"/>
+        <path id="kneeArc" fill="none" stroke="var(--knee)" stroke-width="2" stroke-dasharray="3 4" opacity="0.5"/>
+
+        <!-- foot trajectory -->
+        <polyline id="trail" fill="none" stroke="var(--path)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" points=""/>
+
+        <!-- THIGH -->
+        <line id="thigh" x1="300" y1="150" x2="300" y2="270" stroke="var(--metal)" stroke-width="20" stroke-linecap="round"/>
+        <text id="thighLbl" x="0" y="0" fill="#9fb2cf" font-size="13" text-anchor="middle" direction="rtl">الفخذ L₁</text>
+        <!-- CALF -->
+        <line id="calf" x1="300" y1="270" x2="300" y2="396" stroke="var(--metal)" stroke-width="15" stroke-linecap="round"/>
+        <text id="calfLbl" x="0" y="0" fill="#9fb2cf" font-size="13" text-anchor="middle" direction="rtl">الساق L₂</text>
+
+        <!-- HIP motor -->
+        <g id="hipMotor">
+          <circle cx="300" cy="150" r="26" fill="#20304c" stroke="var(--hip)" stroke-width="3"/>
+          <circle cx="300" cy="150" r="26" fill="none" stroke="var(--hip)" stroke-width="0" id="hipHalo"/>
+          <line id="hipRotor" x1="300" y1="150" x2="300" y2="128" stroke="var(--hip)" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="300" cy="150" r="5" fill="var(--hip)"/>
+        </g>
+        <!-- KNEE motor -->
+        <g id="kneeMotor">
+          <circle id="kneeC" cx="300" cy="270" r="21" fill="#20304c" stroke="var(--knee)" stroke-width="3"/>
+          <line id="kneeRotor" x1="300" y1="270" x2="300" y2="252" stroke="var(--knee)" stroke-width="4" stroke-linecap="round"/>
+          <circle id="kneeHub" cx="300" cy="270" r="4.5" fill="var(--knee)"/>
+        </g>
+        <!-- WHEEL + motor -->
+        <g id="wheelG" transform="translate(300,396)">
+          <circle r="34" fill="none" stroke="var(--wheel)" stroke-width="3" opacity="0.9"/>
+          <circle r="30" fill="var(--tire)" stroke="#0a0f18" stroke-width="2"/>
+          <g id="wheelSpin">
+            <circle r="10" fill="var(--hub)"/>
+            <line x1="0" y1="-28" x2="0" y2="28" stroke="#6b7f9c" stroke-width="3.5"/>
+            <line x1="-28" y1="0" x2="28" y2="0" stroke="#6b7f9c" stroke-width="3.5"/>
+            <line x1="-20" y1="-20" x2="20" y2="20" stroke="#6b7f9c" stroke-width="3"/>
+            <line x1="-20" y1="20" x2="20" y2="-20" stroke="#6b7f9c" stroke-width="3"/>
+          </g>
+        </g>
+
+        <!-- torque arrow (active motor) -->
+        <g id="torque" opacity="0">
+          <path id="torqueArc" fill="none" stroke="#fde68a" stroke-width="3"/>
+          <text id="torqueLbl" x="0" y="0" fill="#fde68a" font-size="16" font-weight="800" text-anchor="middle">τ</text>
+        </g>
+
+        <!-- labels -->
+        <text id="lHip"  x="360" y="150" fill="var(--hip)"  font-size="13" font-weight="700" direction="rtl">مفصل + محرك الورك</text>
+        <text id="lKnee" x="352" y="272" fill="var(--knee)" font-size="13" font-weight="700" direction="rtl">مفصل + محرك الركبة</text>
+        <text id="lWheel" x="352" y="402" fill="var(--wheel)" font-size="13" font-weight="700" direction="rtl">محرك العجلة</text>
+      </svg>
+    </div>
+
+    <div class="side">
+      <div class="box">
+        <h3>اعزل محركاً</h3>
+        <div class="btns" id="btns">
+          <button data-mode="hip" class="active"><span class="dot" style="background:var(--hip)"></span> محرك الورك</button>
+          <button data-mode="knee"><span class="dot" style="background:var(--knee)"></span> محرك الركبة</button>
+          <button data-mode="wheel"><span class="dot" style="background:var(--wheel)"></span> محرك العجلة</button>
+          <button data-mode="step">🐾 خطوة كاملة</button>
+          <button data-mode="manual">✋ تحكّم يدوي</button>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>تحكّم يدوي بالمفاصل</h3>
+        <div class="sld">
+          <label>زاوية الورك <b><span id="hipVal">8</span>°</b></label>
+          <input id="hipSld" type="range" min="-40" max="40" value="8">
+        </div>
+        <div class="sld">
+          <label>زاوية الركبة <b><span id="kneeVal">-16</span>°</b></label>
+          <input id="kneeSld" type="range" min="-115" max="5" value="-16">
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="read">
+          <div class="rd"><div class="k">زاوية الورك</div><div class="v" id="rHip">8°</div></div>
+          <div class="rd"><div class="k">زاوية الركبة</div><div class="v" id="rKnee">-16°</div></div>
+          <div class="rd"><div class="k">ارتفاع القدم</div><div class="v" id="rFoot">—</div></div>
+        </div>
+        <p class="note" id="expl">—</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var V=document.getElementById('leg-viz');
+  var byId=function(id){return V.querySelector('[id="'+id+'"]');};
+  var D=Math.PI/180;
+  var HX=300, HY=150, L1=120, L2=126, SCALE=0.093; // cm per px (L1=120px≈11.2cm)
+
+  var EXPL={
+    hip:'محرك الورك (BLDC + مخفّض) يدوّر الفخذ كاملاً للأمام والخلف حول مفصل الكتف — هذه الحركة هي التي تدفع الرجل في خطوة المشي. لاحظ دوران عمود المحرك (الخط) وتبعه للفخذ.',
+    knee:'محرك الركبة يثني الساق حول مفصل الركبة، فيقصّر أو يمدّ الرجل ويرفع القدم عن الأرض. هو المسؤول عن رفع القدم أثناء التأرجح وامتصاص الصدمة.',
+    wheel:'محرك العجلة يدير العجلة عند طرف الساق للتدحرج. مستقل عن مفصلي الورك والركبة، ويعمل في الوضع المدولب.',
+    step:'خطوة كاملة: يتعاون محركا الورك والركبة معاً — الورك يؤرجح الرجل، والركبة ترفع القدم في مرحلة التأرجح ثم تمدّها في مرحلة الغرس. المسار الأزرق هو مسار القدم الناتج.',
+    manual:'حرّك المنزلقين لتضبط زاويتي الورك والركبة بنفسك وتشاهد كيف يحدّدان موضع القدم (المسألة تسمى الحركية الأمامية / Forward Kinematics).'
+  };
+
+  var mode='hip', tStart=performance.now()/1000, tPrev=tStart, spin=0;
+  var hipDeg=8, kneeDeg=-16, wheelOn=false, trail=[];
+
+  var hipSld=byId('hipSld'), kneeSld=byId('kneeSld');
+
+  function setMode(m){
+    mode=m; tStart=performance.now()/1000; trail=[];
+    var b=V.querySelectorAll('#btns button');
+    for(var i=0;i<b.length;i++) b[i].classList.toggle('active', b[i].getAttribute('data-mode')===m);
+    byId('expl').textContent=EXPL[m];
+  }
+  V.querySelector('#btns').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(b) setMode(b.getAttribute('data-mode'));
+  });
+  hipSld.addEventListener('input',function(){ setActiveManual(); hipDeg=+hipSld.value; });
+  kneeSld.addEventListener('input',function(){ setActiveManual(); kneeDeg=+kneeSld.value; });
+  function setActiveManual(){ if(mode!=='manual') setMode('manual'); }
+
+  function polar(cx,cy,r,angRad){ return [cx+r*Math.sin(angRad), cy+r*Math.cos(angRad)]; }
+  function arcPath(cx,cy,r,a0,a1){
+    var p0=polar(cx,cy,r,a0), p1=polar(cx,cy,r,a1);
+    var large=Math.abs(a1-a0)>Math.PI?1:0;
+    // sweep direction for screen coords
+    return 'M'+p0[0].toFixed(1)+' '+p0[1].toFixed(1)+' A'+r+' '+r+' 0 '+large+' 0 '+p1[0].toFixed(1)+' '+p1[1].toFixed(1);
+  }
+
+  // static range arcs
+  byId('hipArc').setAttribute('d', arcPath(HX,HY,150,-40*D,40*D));
+
+  function frame(now){
+    now/=1000; var dt=Math.min(0.05, now-tPrev); tPrev=now; var t=now-tStart;
+    var spinRate=0;
+
+    if(mode==='hip'){ hipDeg=32*Math.sin(t*1.5); kneeDeg=-16; }
+    else if(mode==='knee'){ hipDeg=8; kneeDeg=-58+56*Math.sin(t*1.7); }
+    else if(mode==='wheel'){ hipDeg=8; kneeDeg=-16; spinRate=680; }
+    else if(mode==='step'){
+      var a=t*1.4;
+      hipDeg=28*Math.cos(a);
+      var sw=Math.max(0,Math.sin(a));      // swing phase
+      kneeDeg=-14 - 66*sw;                 // lift foot during swing
+    }
+    // manual: hipDeg/kneeDeg from sliders (unchanged)
+
+    if(mode!=='manual'){ hipSld.value=hipDeg.toFixed(0); kneeSld.value=kneeDeg.toFixed(0); }
+    spin += dt*spinRate;
+
+    // kinematics
+    var th=hipDeg*D, ph=(hipDeg+kneeDeg)*D;
+    var kx=HX+L1*Math.sin(th), ky=HY+L1*Math.cos(th);
+    var fx=kx+L2*Math.sin(ph), fy=ky+L2*Math.cos(ph);
+
+    // thigh + calf
+    var e;
+    e=byId('thigh'); e.setAttribute('x1',HX);e.setAttribute('y1',HY);e.setAttribute('x2',kx);e.setAttribute('y2',ky);
+    e=byId('calf'); e.setAttribute('x1',kx);e.setAttribute('y1',ky);e.setAttribute('x2',fx);e.setAttribute('y2',fy);
+    // knee motor + rotor
+    byId('kneeC').setAttribute('cx',kx);byId('kneeC').setAttribute('cy',ky);
+    byId('kneeHub').setAttribute('cx',kx);byId('kneeHub').setAttribute('cy',ky);
+    var kr=polar(kx,ky,18,ph);
+    e=byId('kneeRotor'); e.setAttribute('x1',kx);e.setAttribute('y1',ky);e.setAttribute('x2',kr[0]);e.setAttribute('y2',kr[1]);
+    // hip rotor
+    var hr=polar(HX,HY,22,th);
+    e=byId('hipRotor'); e.setAttribute('x2',hr[0]);e.setAttribute('y2',hr[1]);
+    // wheel
+    byId('wheelG').setAttribute('transform','translate('+fx.toFixed(1)+','+fy.toFixed(1)+')');
+    byId('wheelSpin').setAttribute('transform','rotate('+spin.toFixed(1)+')');
+    // knee range arc (relative to thigh direction)
+    byId('kneeArc').setAttribute('d', arcPath(kx,ky,60, th+(-115*D), th+(5*D)));
+    // segment labels (midpoints, offset)
+    byId('thighLbl').setAttribute('x',((HX+kx)/2 - 30).toFixed(0));byId('thighLbl').setAttribute('y',((HY+ky)/2).toFixed(0));
+    byId('calfLbl').setAttribute('x',((kx+fx)/2 - 28).toFixed(0));byId('calfLbl').setAttribute('y',((ky+fy)/2).toFixed(0));
+    byId('lWheel').setAttribute('x',(fx+40).toFixed(0));byId('lWheel').setAttribute('y',(fy+4).toFixed(0));
+    byId('lKnee').setAttribute('x',(kx+30).toFixed(0));byId('lKnee').setAttribute('y',(ky+4).toFixed(0));
+
+    // torque highlight on active motor
+    var tq=byId('torque');
+    var showT = (mode==='hip'||mode==='knee'||mode==='step');
+    if(showT){
+      tq.setAttribute('opacity',1);
+      var cx,cy,rr,base;
+      if(mode==='knee'){ cx=kx;cy=ky;rr=32;base=ph; byId('kneeMotor').setAttribute('opacity',1);}
+      else { cx=HX;cy=HY;rr=40;base=th; }
+      byId('torqueArc').setAttribute('d', arcPath(cx,cy,rr, base-0.9, base+0.9));
+      byId('torqueLbl').setAttribute('x',(cx-rr-8).toFixed(0)); byId('torqueLbl').setAttribute('y',(cy).toFixed(0));
+    } else { tq.setAttribute('opacity',0); }
+
+    // halo pulse on active motor
+    var pulse = 3+2*Math.sin(now*6);
+    byId('hipHalo').setAttribute('stroke-width', (mode==='hip'||mode==='step')?pulse:0);
+    byId('kneeC').setAttribute('stroke-width', (mode==='knee'||mode==='step')?(2+pulse*0.5):3);
+
+    // foot trail in step mode
+    if(mode==='step'){
+      trail.push(fx.toFixed(1)+','+fy.toFixed(1)); if(trail.length>90) trail.shift();
+      byId('trail').setAttribute('points', trail.join(' '));
+      byId('trail').setAttribute('opacity',0.85);
+    } else { byId('trail').setAttribute('points',''); }
+
+    // readouts
+    byId('rHip').textContent=Math.round(hipDeg)+'°';
+    byId('rKnee').textContent=Math.round(kneeDeg)+'°';
+    byId('hipVal').textContent=Math.round(hipDeg);
+    byId('kneeVal').textContent=Math.round(kneeDeg);
+    var footCm=((fy-HY)*SCALE).toFixed(1);
+    byId('rFoot').textContent=footCm+' cm';
+
+    requestAnimationFrame(frame);
+  }
+  setMode('hip');
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

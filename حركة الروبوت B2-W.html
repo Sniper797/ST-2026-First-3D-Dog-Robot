@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كيف يتحرّك الكلب الروبوتي المدولب — Unitree B2-W</title>
+<style>
+  #b2w-viz{
+    --bg:#0b1220; --card:#0f1a2e; --card2:#13223d; --line:#24344f;
+    --ink:#e8f0fc; --muted:#9fb2cf; --accent:#38bdf8; --accent2:#2E75B6;
+    --metal:#cdd8e6; --metal-d:#8ea3bd; --tire:#111827; --hub:#334155;
+    --cog:#fbbf24; --ok:#34d399; --bad:#f87171;
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif; color:var(--ink);
+    background:var(--bg); border:1px solid var(--line); border-radius:16px;
+    padding:18px 18px 20px; max-width:1000px; margin:0 auto; direction:rtl;
+  }
+  #b2w-viz .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  #b2w-viz h1{font-size:22px;margin:0 0 2px;font-weight:800;letter-spacing:.2px}
+  #b2w-viz .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+  #b2w-viz .sub b{color:var(--accent)}
+  #b2w-viz .stage{background:linear-gradient(#0c1526,#0a1120);border:1px solid var(--line);
+    border-radius:12px;overflow:hidden}
+  #b2w-viz svg{display:block;width:100%;height:auto}
+  #b2w-viz .controls{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px}
+  #b2w-viz button{appearance:none;cursor:pointer;border:1px solid var(--line);
+    background:var(--card2);color:var(--ink);padding:9px 14px;border-radius:10px;
+    font-size:14px;font-weight:700;transition:.15s;font-family:inherit}
+  #b2w-viz button:hover{border-color:var(--accent2);background:#172a49}
+  #b2w-viz button.active{background:var(--accent2);border-color:var(--accent);color:#fff;
+    box-shadow:0 0 0 3px rgba(56,189,248,.18)}
+  #b2w-viz .panel{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+  #b2w-viz .desc{flex:1 1 340px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:13px 15px}
+  #b2w-viz .desc .mname{font-size:16px;font-weight:800;color:var(--accent);margin-bottom:6px}
+  #b2w-viz .desc .mtext{font-size:14px;line-height:1.75;color:#dbe6f6}
+  #b2w-viz .chip{display:inline-block;margin-top:10px;font-size:12.5px;font-weight:700;
+    color:#062;background:var(--ok);padding:4px 10px;border-radius:20px}
+  #b2w-viz .legend{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;justify-content:center;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;min-width:150px}
+  #b2w-viz .lg{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
+  #b2w-viz .sw{width:16px;height:16px;border-radius:5px;flex:none}
+</style>
+</head>
+<body>
+<div id="b2w-viz">
+  <h2 class="sr-only">رسم متحرك تفاعلي يوضّح أنماط حركة الروبوت المدولب Unitree B2-W: التدحرج على العجلات، المشي بالخبب، الوقوف والانبطاح، تسلق المنحدر، والاتزان الديناميكي.</h2>
+  <h1>كيف يتحرّك الكلب الروبوتي المدولب</h1>
+  <div class="sub"><b>Unitree B2-W</b> — اضغط زراً لمشاهدة كل نمط حركة</div>
+
+  <div class="stage">
+    <svg viewBox="0 0 960 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="روبوت رباعي القوائم بعجلات متحرك">
+      <!-- support base + CoG overlay (screen space) -->
+      <g id="cogOverlay">
+        <rect id="supportBand" x="0" y="378" width="0" height="6" rx="3" fill="#38bdf8" opacity="0.18"/>
+        <line id="plumb" x1="480" y1="250" x2="480" y2="384" stroke="var(--cog)" stroke-width="2" stroke-dasharray="4 5" opacity="0.9"/>
+        <circle id="cogDot" cx="480" cy="250" r="7" fill="var(--cog)" stroke="#7c5b00" stroke-width="1.5"/>
+      </g>
+
+      <g id="stage">
+        <!-- ground -->
+        <line x1="0" y1="384" x2="960" y2="384" stroke="#33507a" stroke-width="3"/>
+        <line id="groundDash" x1="0" y1="392" x2="960" y2="392" stroke="#22385c" stroke-width="6" stroke-dasharray="34 26"/>
+
+        <!-- speed lines (roll) -->
+        <g id="speed" opacity="0">
+          <line x1="70" y1="250" x2="150" y2="250" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+          <line x1="55" y1="285" x2="140" y2="285" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+          <line x1="80" y1="320" x2="150" y2="320" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" opacity=".4"/>
+        </g>
+
+        <g id="robot">
+          <!-- FAR legs (dim, for depth) -->
+          <g opacity="0.35">
+            <line id="rf-thigh" x1="70" y1="24" x2="56" y2="70" stroke="var(--metal-d)" stroke-width="12" stroke-linecap="round"/>
+            <line id="rf-calf"  x1="56" y1="70" x2="70" y2="114" stroke="var(--metal-d)" stroke-width="9" stroke-linecap="round"/>
+            <g id="rf-wheel" transform="translate(70,114)"><circle r="20" fill="var(--tire)" stroke="#2b3a52" stroke-width="4"/></g>
+            <line id="rr-thigh" x1="-70" y1="24" x2="-56" y2="70" stroke="var(--metal-d)" stroke-width="12" stroke-linecap="round"/>
+            <line id="rr-calf"  x1="-56" y1="70" x2="-70" y2="114" stroke="var(--metal-d)" stroke-width="9" stroke-linecap="round"/>
+            <g id="rr-wheel" transform="translate(-70,114)"><circle r="20" fill="var(--tire)" stroke="#2b3a52" stroke-width="4"/></g>
+          </g>
+
+          <!-- BODY -->
+          <g id="bodyG">
+            <rect x="-122" y="-34" width="244" height="68" rx="20" fill="var(--metal)" stroke="var(--metal-d)" stroke-width="2"/>
+            <rect x="-122" y="-2" width="244" height="36" rx="16" fill="#b9c6d8" opacity=".55"/>
+            <!-- head (front = +x) -->
+            <rect x="96" y="-26" width="46" height="52" rx="14" fill="#dfe8f3" stroke="var(--metal-d)" stroke-width="2"/>
+            <circle cx="126" cy="-6" r="6.5" fill="#0b1220"/>
+            <circle cx="126" cy="14" r="6.5" fill="#0b1220"/>
+            <!-- lidar dome -->
+            <rect x="-30" y="-52" width="52" height="20" rx="7" fill="#22c1e6" opacity=".85"/>
+            <rect x="-30" y="-52" width="52" height="20" rx="7" fill="none" stroke="#0891b2" stroke-width="1.5"/>
+          </g>
+
+          <!-- NEAR legs -->
+          <!-- front -->
+          <line id="f-thigh" x1="82" y1="24" x2="66" y2="70" stroke="var(--metal)" stroke-width="15" stroke-linecap="round"/>
+          <line id="f-calf"  x1="66" y1="70" x2="82" y2="114" stroke="var(--metal)" stroke-width="11" stroke-linecap="round"/>
+          <circle id="f-hip"  cx="82" cy="24" r="8" fill="var(--hub)" stroke="var(--accent)" stroke-width="2.5"/>
+          <circle id="f-knee" cx="66" cy="70" r="6.5" fill="var(--hub)" stroke="var(--accent)" stroke-width="2"/>
+          <g id="f-wheel" transform="translate(82,114)">
+            <circle r="26" fill="var(--tire)" stroke="#0a0f18" stroke-width="2"/>
+            <circle r="26" fill="none" stroke="#3b4d68" stroke-width="3"/>
+            <g id="f-spin">
+              <circle r="9" fill="var(--hub)"/>
+              <line x1="0" y1="-24" x2="0" y2="24" stroke="#64748b" stroke-width="3"/>
+              <line x1="-24" y1="0" x2="24" y2="0" stroke="#64748b" stroke-width="3"/>
+              <line x1="-17" y1="-17" x2="17" y2="17" stroke="#64748b" stroke-width="2.5"/>
+              <line x1="-17" y1="17" x2="17" y2="-17" stroke="#64748b" stroke-width="2.5"/>
+            </g>
+          </g>
+          <!-- rear -->
+          <line id="b-thigh" x1="-82" y1="24" x2="-66" y2="70" stroke="var(--metal)" stroke-width="15" stroke-linecap="round"/>
+          <line id="b-calf"  x1="-66" y1="70" x2="-82" y2="114" stroke="var(--metal)" stroke-width="11" stroke-linecap="round"/>
+          <circle id="b-hip"  cx="-82" cy="24" r="8" fill="var(--hub)" stroke="var(--accent)" stroke-width="2.5"/>
+          <circle id="b-knee" cx="-66" cy="70" r="6.5" fill="var(--hub)" stroke="var(--accent)" stroke-width="2"/>
+          <g id="b-wheel" transform="translate(-82,114)">
+            <circle r="26" fill="var(--tire)" stroke="#0a0f18" stroke-width="2"/>
+            <circle r="26" fill="none" stroke="#3b4d68" stroke-width="3"/>
+            <g id="b-spin">
+              <circle r="9" fill="var(--hub)"/>
+              <line x1="0" y1="-24" x2="0" y2="24" stroke="#64748b" stroke-width="3"/>
+              <line x1="-24" y1="0" x2="24" y2="0" stroke="#64748b" stroke-width="3"/>
+              <line x1="-17" y1="-17" x2="17" y2="17" stroke="#64748b" stroke-width="2.5"/>
+              <line x1="-17" y1="17" x2="17" y2="-17" stroke="#64748b" stroke-width="2.5"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="controls" id="controls">
+    <button data-mode="roll" class="active">🛞 التدحرج</button>
+    <button data-mode="trot">🦿 المشي (خبب)</button>
+    <button data-mode="stand">↕ وقوف/انبطاح</button>
+    <button data-mode="climb">⛰ تسلّق منحدر</button>
+    <button data-mode="balance">⚖ اتزان ديناميكي</button>
+  </div>
+
+  <div class="panel">
+    <div class="desc">
+      <div class="mname" id="mName">—</div>
+      <div class="mtext" id="mText">—</div>
+      <span class="chip" id="mChip">—</span>
+    </div>
+    <div class="legend">
+      <div class="lg"><span class="sw" style="background:var(--metal)"></span> وصلات الأرجل</div>
+      <div class="lg"><span class="sw" style="background:var(--hub);border:2px solid var(--accent)"></span> مفصل BLDC</div>
+      <div class="lg"><span class="sw" style="background:var(--tire);border:2px solid #3b4d68"></span> عجلة مُدارة</div>
+      <div class="lg"><span class="sw" style="background:var(--cog)"></span> مركز الثقل</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var V=document.getElementById('b2w-viz');
+  var $=function(id){return V.querySelector('#'+id) || document.getElementById(id);};
+  var byId=function(id){return V.querySelector('[id="'+id+'"]');};
+
+  var MODES={
+    roll:{name:'التدحرج على العجلات',
+      text:'العجلات الأربع تدور بمحرّك BLDC مستقل (سرعة حتى 20 كم/س). الأرجل تبقى شبه ثابتة وتعمل كتعليق نشط يمتص الاهتزاز على الأرض المستوية — أسرع وأكفأ وضع للحركة.',
+      chip:'فعّال: 4 محركات عجلات'},
+    trot:{name:'المشي — مِشية الخبب',
+      text:'تُقفَل العجلات وتُستخدم كأقدام. تتحرك الأرجل القطرية بالتناوب (رفع → تأرجح → غرس) لتخطّي الدرج والعوائق والتضاريس الوعرة التي لا تصلح لها العجلات.',
+      chip:'فعّال: 12 مفصل أرجل'},
+    stand:{name:'الوقوف والانبطاح',
+      text:'يرتفع الجسم وينخفض عبر مدّ وقبض الركبتين مع بقاء العجلات ملامسة للأرض — يُستخدم لضبط الارتفاع، الانحناء لالتقاط حمولة، أو خفض مركز الثقل قبل مناورة.',
+      chip:'فعّال: مفاصل الركبة'},
+    climb:{name:'تسلّق المنحدر',
+      text:'تدفع العجلات الروبوت على منحدر يفوق 45°. تعدّل الأرجل أطوالها لإبقاء الجسم قريباً من الأفقي، ويبقى مركز الثقل المنخفض فوق قاعدة الإسناد لمنع الانقلاب.',
+      chip:'فعّال: عجلات + تعديل الأرجل'},
+    balance:{name:'الاتزان الديناميكي',
+      text:'يتصرّف الروبوت كبندول مقلوب على عجلتين: يحرّك العجلات والأرجل باستمرار للأمام والخلف لتصحيح أي ميل والبقاء منتصباً — نفس مبدأ توازن الدرّاجة ذاتية التوازن.',
+      chip:'فعّال: تحكّم لحظي بالعزم'}
+  };
+
+  var GROUND=384, HIPY=24, BX=480;
+  var mode='roll', tStart=performance.now()/1000, tPrev=tStart, spin=0, scroll=0;
+
+  function setLine(id,x1,y1,x2,y2){var e=byId(id);e.setAttribute('x1',x1);e.setAttribute('y1',y1);e.setAttribute('x2',x2);e.setAttribute('y2',y2);}
+  function setC(id,cx,cy){var e=byId(id);e.setAttribute('cx',cx);e.setAttribute('cy',cy);}
+  function setT(id,t){byId(id).setAttribute('transform',t);}
+
+  // draw one near leg: hip local (hx,hy), reach (vertical), kneeOut (sideways bend)
+  function leg(pfx,hx,reach,kneeOut){
+    var wx=hx, wy=HIPY+reach;
+    var kx=hx+kneeOut, ky=HIPY+reach*0.5;
+    setLine(pfx+'-thigh',hx,HIPY,kx,ky);
+    setLine(pfx+'-calf',kx,ky,wx,wy);
+    setC(pfx+'-knee',kx,ky);
+    setT(pfx+'-wheel','translate('+wx+','+wy+')');
+    return {wx:wx,wy:wy};
+  }
+  function farLeg(pfx,hx,reach,kneeOut){
+    var wx=hx,wy=HIPY+reach,kx=hx+kneeOut,ky=HIPY+reach*0.5;
+    setLine(pfx+'-thigh',hx,HIPY,kx,ky);setLine(pfx+'-calf',kx,ky,wx,wy);
+    setT(pfx+'-wheel','translate('+wx+','+wy+')');
+  }
+
+  function setMode(m){
+    mode=m; tStart=performance.now()/1000;
+    var btns=V.querySelectorAll('button');
+    for(var i=0;i<btns.length;i++) btns[i].classList.toggle('active',btns[i].getAttribute('data-mode')===m);
+    byId('mName').textContent=MODES[m].name;
+    byId('mText').textContent=MODES[m].text;
+    byId('mChip').textContent=MODES[m].chip;
+  }
+  V.querySelector('#controls').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(b) setMode(b.getAttribute('data-mode'));
+  });
+
+  var D=Math.PI/180;
+  function frame(now){
+    now/=1000; var dt=Math.min(0.05,now-tPrev); tPrev=now; var t=now-tStart;
+    var by=266, pitch=0, tilt=0, reachF=90, reachR=90, koF=-16, koR=16;
+    var spinRate=0, scrollRate=0, cogShift=0, showSpeed=false, showCog=true;
+
+    if(mode==='roll'){
+      by=266+Math.sin(t*7)*3; pitch=Math.sin(t*7+1)*1.2;
+      spinRate=760; scrollRate=340; showSpeed=true;
+    } else if(mode==='trot'){
+      var ph=t*4.2;
+      var liftF=Math.max(0,Math.sin(ph)), liftR=Math.max(0,Math.sin(ph+Math.PI));
+      reachF=90-30*liftF; reachR=90-30*liftR;
+      koF=-16-10*Math.cos(ph); koR=16+10*Math.cos(ph+Math.PI);
+      by=266-3*Math.abs(Math.sin(ph)); pitch=3*Math.sin(ph);
+      scrollRate=55; cogShift=16*Math.sin(ph);
+    } else if(mode==='stand'){
+      var s=(Math.sin(t*1.7)+1)/2;      // 0 low .. 1 high
+      reachF=reachR=68+30*s; by=GROUND-(HIPY+reachF);
+      koF=-14-8*(1-s); koR=14+8*(1-s);
+    } else if(mode==='climb'){
+      tilt=-22; spinRate=460; scrollRate=250; showCog=false;
+      reachF=78; reachR=100;             // uphill(front) short, downhill(rear) long -> levels body
+      by=266; pitch=0;
+    } else if(mode==='balance'){
+      pitch=9*Math.sin(t*2.2);
+      reachF=reachR=88; by=268-6*Math.max(0,Math.sin(t*2.2*2))*0; // steady
+      spinRate=120*Math.sin(t*2.2); // rock wheels back/forth
+      cogShift=26*Math.sin(t*2.2);
+      by=268 - 8*Math.pow(Math.max(0,Math.sin(t*1.6)),6); // occasional little hop dip
+    }
+
+    spin+=dt*spinRate; scroll+=dt*scrollRate;
+
+    // robot transform
+    setT('robot','translate('+BX+','+by+') rotate('+pitch+')');
+    setT('stage','rotate('+tilt+' '+BX+' '+GROUND+')');
+
+    // legs
+    leg('f',82,reachF,koF); leg('b',-82,reachR,koR);
+    farLeg('rf',70,reachF-2,koF); farLeg('rr',-70,reachR-2,koR);
+    setT('f-spin','rotate('+spin+')'); setT('b-spin','rotate('+spin+')');
+
+    // ground dash scroll
+    byId('groundDash').setAttribute('stroke-dashoffset', -scroll);
+    byId('speed').setAttribute('opacity', showSpeed?0.9:0);
+
+    // CoG overlay (screen space)
+    var ov=byId('cogOverlay');
+    if(showCog){
+      ov.setAttribute('opacity',1);
+      var cx=BX+cogShift, cy=by-2;
+      var L=BX-92, R=BX+92;
+      byId('supportBand').setAttribute('x',L);
+      byId('supportBand').setAttribute('width',R-L);
+      var inside=(cx>=L&&cx<=R);
+      byId('cogDot').setAttribute('cx',cx); byId('cogDot').setAttribute('cy',cy);
+      byId('cogDot').setAttribute('fill', inside?'var(--cog)':'var(--bad)');
+      byId('plumb').setAttribute('x1',cx); byId('plumb').setAttribute('x2',cx);
+      byId('plumb').setAttribute('y1',cy); byId('plumb').setAttribute('y2',GROUND);
+      byId('plumb').setAttribute('stroke', inside?'var(--cog)':'var(--bad)');
+    } else { ov.setAttribute('opacity',0); }
+
+    requestAnimationFrame(frame);
+  }
+  setMode('roll');
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
