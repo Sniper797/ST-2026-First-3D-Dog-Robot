@@ -2,6 +2,8 @@
 
 A student build of a **wheel‑legged quadruped** inspired by the **Unitree B2‑W**: four legs that both **walk** and **roll**, a 3D‑printed chassis, an NVIDIA **Jetson Orin** brain, and **16 motors** (three joints + one driven wheel per leg).
 
+> 🌐 **Live tools** (once GitHub Pages is enabled): <https://sniper797.github.io/ST-2026-First-3D-Dog-Robot/>
+
 ![ST Robot 2026 — Fusion 360 model](docs/fusion-final.png)
 
 ---

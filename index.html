@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ST Robot 2026 — كلب روبوتي مدولب</title>
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f1a2e; --card2:#13223d; --line:#24344f;
+    --ink:#e8f0fc; --muted:#9fb2cf; --accent:#38bdf8; --accent2:#2E75B6;
+    --hip:#f59e0b; --knee:#a78bfa; --wheel:#34d399;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.7}
+  a{color:var(--accent);text-decoration:none}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 18px}
+  header{padding:34px 0 10px;text-align:center}
+  header h1{font-size:32px;margin:0 0 6px;font-weight:800;letter-spacing:.3px}
+  header .sub{color:var(--muted);font-size:15px}
+  header .sub b{color:var(--accent)}
+  .topnav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .topnav a{border:1px solid var(--line);background:var(--card2);border-radius:9px;
+    padding:7px 13px;font-size:13.5px;font-weight:700;color:var(--ink);transition:.15s}
+  .topnav a:hover{border-color:var(--accent2);background:#172a49}
+  .hero{margin:22px 0 8px;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    background:#0a1120}
+  .hero img{display:block;width:100%;height:auto}
+  .cap{color:var(--muted);font-size:13px;text-align:center;margin:8px 0 26px}
+  h2{font-size:19px;font-weight:800;margin:30px 0 14px;color:var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .card{display:block;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    background:var(--card);transition:.18s;color:var(--ink)}
+  .card:hover{transform:translateY(-3px);border-color:var(--accent2);
+    box-shadow:0 10px 26px rgba(0,0,0,.35)}
+  .card .thumb{aspect-ratio:16/10;background:#0a1120 center/cover no-repeat;border-bottom:1px solid var(--line)}
+  .card .body{padding:13px 15px 16px}
+  .card h3{margin:0 0 5px;font-size:16px;font-weight:800}
+  .card p{margin:0;font-size:13px;color:var(--muted)}
+  .card .go{display:inline-block;margin-top:10px;font-size:13px;font-weight:700;color:var(--accent)}
+  .dl{display:flex;gap:10px;flex-wrap:wrap}
+  .dl a{border:1px solid var(--line);background:var(--card2);border-radius:10px;
+    padding:10px 15px;font-size:14px;font-weight:700;color:var(--ink);transition:.15s}
+  .dl a:hover{border-color:var(--accent2);background:#172a49}
+  .ref{display:flex;gap:16px;flex-wrap:wrap;align-items:center;
+    border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px}
+  .ref img{width:220px;max-width:45%;border-radius:10px;display:block}
+  .ref .t{flex:1 1 260px}
+  .ref .t b{color:var(--ink)}
+  footer{color:#7f93b3;font-size:12.5px;text-align:center;margin:36px 0 26px;
+    border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>ST&nbsp;Robot&nbsp;2026 🐕</h1>
+    <div class="sub">كلب روبوتي مدولب بأسلوب <b>Unitree B2‑W</b> — أربع أرجل تمشي وتتدحرج · هيكل مطبوع ثلاثي الأبعاد · دماغ Jetson · 16 محركاً</div>
+    <div class="topnav">
+      <a href="https://github.com/Sniper797/ST-2026-First-3D-Dog-Robot">📦 المستودع على GitHub</a>
+      <a href="https://www.youtube.com/watch?v=iI8UUu9g8iI">🎥 الفيديو المرجعي</a>
+    </div>
+  </header>
+
+  <div class="hero"><img src="docs/fusion-final.png" alt="تصميم ST Robot 2026 في Fusion 360"></div>
+  <div class="cap">التصميم النهائي في Fusion 360 — الجسم، الأرجل الأربع، والمحرّكات</div>
+
+  <h2>استكشِف المشروع تفاعلياً</h2>
+  <div class="grid">
+    <a class="card" href="robot-3d-model.html">
+      <div class="thumb" style="background-image:url('docs/viewer-poses.png')"></div>
+      <div class="body">
+        <h3>النموذج ثلاثي الأبعاد</h3>
+        <p>دُر حول المجسّم، حرّك المفاصل، وبدّل الأوضاع (وقوف/انبطاح/جلوس).</p>
+        <span class="go">افتح العارض ↗</span>
+      </div>
+    </a>
+    <a class="card" href="%D8%AD%D8%B1%D9%83%D8%A9%20%D9%85%D9%81%D8%A7%D8%B5%D9%84%20%D8%A7%D9%84%D8%B1%D8%AC%D9%84%20%D9%88%D9%85%D8%AD%D8%B1%D9%83%D8%A7%D8%AA%D9%87%D8%A7.html">
+      <div class="thumb" style="background-image:url('docs/leg-explainer.png')"></div>
+      <div class="body">
+        <h3>حركة مفاصل الرجل</h3>
+        <p>رجل واحدة — اعزل كل محرّك (الورك/الركبة/العجلة) وشاهد كيف يحرّك مفصله.</p>
+        <span class="go">افتح الشرح ↗</span>
+      </div>
+    </a>
+    <a class="card" href="%D8%AD%D8%B1%D9%83%D8%A9%20%D8%A7%D9%84%D8%B1%D9%88%D8%A8%D9%88%D8%AA%20B2-W.html">
+      <div class="thumb" style="background-image:url('docs/viewer-labeled.png')"></div>
+      <div class="body">
+        <h3>أنماط حركة الروبوت</h3>
+        <p>كيف يتدحرج، يمشي، يقف، ويتسلّق — أنماط الحركة الكاملة للروبوت.</p>
+        <span class="go">افتح الشرح ↗</span>
+      </div>
+    </a>
+  </div>
+
+  <h2>كيف تعمل الرجل</h2>
+  <div class="hero" style="padding:8px"><img src="docs/leg-mechanism.svg" alt="آلية الرجل — المحركات الأربعة"></div>
+  <div class="cap">كل رجل = 3 محرّكات دوّارة (فرد جانبي + ورك + ركبة) + محرّك عجلة · 4 أرجل = 16 محرّكاً</div>
+
+  <h2>المرجع</h2>
+  <div class="ref">
+    <a href="https://www.youtube.com/watch?v=iI8UUu9g8iI"><img src="docs/01-unitree-b2w.png" alt="Unitree B2-W"></a>
+    <div class="t">بدأ المشروع من روبوت <b>Unitree&nbsp;B2‑W</b> — كلب رباعي بعجلات مدفوعة عند الأقدام يجمع بين المشي والتدحرج.
+      <br><a href="https://www.youtube.com/watch?v=iI8UUu9g8iI">شاهد الفيديو المرجعي ↗</a></div>
+  </div>
+
+  <h2>ملفات التصميم</h2>
+  <div class="dl">
+    <a href="ST%20Robot%202026.f3z">⬇ Fusion (.f3z)</a>
+    <a href="ST%20Robot%202026.stl">⬇ مجسّم للطباعة (.stl)</a>
+    <a href="ST%20Robot%202026.3mf">⬇ تصدير (.3mf)</a>
+    <a href="spec.json">⬇ المواصفات (spec.json)</a>
+    <a href="build_robot.py">⬇ سكربت Fusion (build_robot.py)</a>
+  </div>
+
+  <footer>
+    ST&nbsp;Robot&nbsp;2026 — مشروع طلابي · مرجع: <a href="https://www.youtube.com/watch?v=iI8UUu9g8iI">Unitree B2‑W</a>
+  </footer>
+
+</div>
+</body>
+</html>
